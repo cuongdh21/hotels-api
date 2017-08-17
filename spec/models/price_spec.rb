@@ -47,4 +47,47 @@ RSpec.describe Price, type: :model do
       end
     end
   end
+
+  describe '.merge_prices' do
+    let(:expedia_result) { {
+      hot1: { price: 100, key: 'ex-1', additional: 'no children' },
+      hot2: { price: 200, key: 'ex-2' },
+      hot3: { price: 300, key: 'ex-3' },
+      hot4: { price: 400, key: 'ex-4' }
+    } }
+
+    let(:agoda_result)  { {
+      hot1: { price: 110, key: 'ag-1'},
+      hot4: { price: 350, key: 'ag-4'}
+    } }
+
+    let(:booking_result) { {
+      hot2: { price: 190, key: 'bk-2' },
+      hot3: { price: 300, key: 'bk-3' },
+      hot4: { price: 320, key: 'bk-4' }
+    } }
+
+    let(:orbitz_result) { {
+      hot4: { price: 290, key: 'or-4' },
+      hot5: { price: 420, key: 'or-5' }
+    } }
+
+    it "works" do
+      result = Price.merge_prices([expedia_result, agoda_result, booking_result, orbitz_result])
+      expect(result[:hot1]).to eq(expedia_result[:hot1])
+      expect(result[:hot2]).to eq(booking_result[:hot2])
+      expect(result[:hot3]).to eq(booking_result[:hot3])
+      expect(result[:hot4]).to eq(orbitz_result[:hot4])
+      expect(result[:hot5]).to eq(orbitz_result[:hot5])
+
+      result = Price.merge_prices([expedia_result, agoda_result])
+      expect(result[:hot1]).to eq(expedia_result[:hot1])
+      expect(result[:hot2]).to eq(expedia_result[:hot2])
+      expect(result[:hot3]).to eq(expedia_result[:hot3])
+      expect(result[:hot4]).to eq(agoda_result[:hot4])
+
+      result = Price.merge_prices([expedia_result])
+      expect(result).to eq(expedia_result)
+    end
+  end
 end

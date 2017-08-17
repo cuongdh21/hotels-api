@@ -13,4 +13,29 @@ class Price
 
     hotels_with_prices.values
   end
+
+  def self.merge_prices(suppliers)
+    suppliers_count = suppliers.count
+
+    if suppliers_count == 1
+      return suppliers.first
+    elsif suppliers.count == 2
+      merge_prices_two_suppliers(suppliers.first, suppliers.second)
+    else
+      half = (suppliers_count/2).round
+      merge_prices([merge_prices(suppliers.first(half)), merge_prices(suppliers.last(suppliers_count - half))])
+    end 
+  end
+
+  def self.merge_prices_two_suppliers(supplier1, supplier2)
+    all_hotels = supplier1.keys | supplier2.keys
+    all_hotels.inject({}) do |hotel_prices, hotel|
+      if supplier1[hotel] && supplier2[hotel]
+        hotel_prices[hotel] = supplier1[hotel][:price] < supplier2[hotel][:price] ? supplier1[hotel] : supplier2[hotel]
+      else
+        hotel_prices[hotel] = supplier1[hotel] || supplier2[hotel]
+      end
+      hotel_prices
+    end 
+  end
 end
